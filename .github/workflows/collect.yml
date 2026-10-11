@@ -1,0 +1,35 @@
+name: 澎湖氣象資料收集
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: 安裝套件
+        run: pip install requests
+
+      - name: 抓取資料
+        env:
+          CWA_API_KEY: ${{ secrets.CWA_API_KEY }}
+        run: python gha_fetch.py
+
+      - name: 提交變更（若有新資料才 commit）
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add gha_log/weather_log.csv
+          git diff --cached --quiet || git commit -m "自動收集：$(date -u +'%Y-%m-%d %H:%M UTC')"
+          git push
