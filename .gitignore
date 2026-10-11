@@ -1,0 +1,6 @@
+# 機密與本機資料，請勿上傳
+api_key.txt
+*.db
+__pycache__/
+history_raw/
+analysis_output/
